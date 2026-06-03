@@ -1,6 +1,4 @@
-## 11. Remove Element
 
-```cpp
 class Solution {
 public:
     int removeElement(vector<int>& nums, int val) {
@@ -17,9 +15,7 @@ public:
         return k;
     }
 };
-```
 
----
 
 # 12. Find First Occurrence in a String (strStr)
 
