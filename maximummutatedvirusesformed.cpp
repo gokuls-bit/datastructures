@@ -1,62 +1,54 @@
 #include <iostream>
 #include <vector>
-#include <cstring>
+#include <algorithm>
 using namespace std;
 
 int maxMutatedViruses(int N, vector<int>& contamination_levels) {
-    const int MAXL = 105;
+    const int MAXV = 105;
     const int NEG = -1e9;
 
-    vector<int> freq(MAXL, 0);
+    vector<int> cnt(MAXV, 0);
+    for (int x : contamination_levels) cnt[x]++;
 
-    for (int x : contamination_levels) {
-        freq[x]++;
-    }
+    // dp[i][a][b]
+    // i = current contamination level
+    // a = how many of level i are already used by previous consecutive groups
+    // b = how many of level i+1 are already used by previous consecutive groups
+    int dp[MAXV][3][3];
 
-    // dp[level][a][b]
-    // level = current contamination level being processed
-    // a = how many viruses of current level are already used
-    // b = how many viruses of next level are already used
-    int dp[MAXL][3][3];
-
-    for (int i = 0; i < MAXL; i++) {
-        for (int j = 0; j < 3; j++) {
-            for (int k = 0; k < 3; k++) {
+    for (int i = 0; i < MAXV; i++)
+        for (int j = 0; j < 3; j++)
+            for (int k = 0; k < 3; k++)
                 dp[i][j][k] = NEG;
-            }
-        }
-    }
 
     dp[1][0][0] = 0;
 
-    for (int level = 1; level <= 100; level++) {
+    for (int i = 1; i <= 100; i++) {
         for (int a = 0; a < 3; a++) {
             for (int b = 0; b < 3; b++) {
+                if (dp[i][a][b] < 0) continue;
 
-                if (dp[level][a][b] == NEG) continue;
+                if (cnt[i] < a || cnt[i + 1] < b) continue;
 
-                if (freq[level] < a || freq[level + 1] < b) continue;
+                // remaining count of current level after fulfilling old consecutive groups
+                int remain = cnt[i] - a;
 
-                int remaining = freq[level] - a;
+                // how many NEW consecutive groups (i, i+1, i+2) can we start?
+                int limit = min({remain, cnt[i + 1] - b, cnt[i + 2], 2});
 
-                // t = number of consecutive groups formed:
-                // (level, level+1, level+2)
-                int maxT = remaining;
-                maxT = min(maxT, freq[level + 1] - b);
-                maxT = min(maxT, freq[level + 2]);
+                for (int take = 0; take <= limit; take++) {
+                    int left = remain - take;
 
-                // t only needs to be checked up to 2
-                // because 3 of same type can be turned into one identical group
-                for (int t = 0; t <= maxT && t < 3; t++) {
+                    // use remaining current level for identical triples
+                    int same = left / 3;
 
-                    int rem = remaining - t;
-
-                    // make groups of same contamination level
-                    int sameGroups = rem / 3;
-
-                    dp[level + 1][b + t][t] = max(
-                        dp[level + 1][b + t][t],
-                        dp[level][a][b] + t + sameGroups
+                    // next state:
+                    // level i+1 already has b viruses used from previous,
+                    // plus 'take' more due to new groups started here
+                    // level i+2 has 'take' used due to new groups started here
+                    dp[i + 1][b][take] = max(
+                        dp[i + 1][b][take],
+                        dp[i][a][b] + take + same
                     );
                 }
             }
@@ -64,7 +56,6 @@ int maxMutatedViruses(int N, vector<int>& contamination_levels) {
     }
 
     int ans = 0;
-
     for (int a = 0; a < 3; a++) {
         for (int b = 0; b < 3; b++) {
             ans = max(ans, dp[101][a][b]);
@@ -83,8 +74,6 @@ int main() {
         cin >> contamination_levels[i];
     }
 
-    int result = maxMutatedViruses(V, contamination_levels);
-    cout << result << endl;
-
+    cout << maxMutatedViruses(V, contamination_levels) << endl;
     return 0;
 }
