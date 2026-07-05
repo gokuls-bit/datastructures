@@ -1,9 +1,6 @@
 class Solution(object):
     def pathsWithMaxScore(self, board):
-        """
-        :type board: List[str]
-        :rtype: List[int]
-        """
+    
         MOD = 10 ** 9 + 7
         n = len(board)
 
