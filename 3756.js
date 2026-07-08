@@ -11,6 +11,8 @@ var sumAndMultiply = function(s, queries) {
     const cnt = new Array(n + 1).fill(0);
     const digitSum = new Array(n + 1).fill(0);
 
+    
+
     const digits = [];
 
     for (let i = 0; i < n; i++) {
