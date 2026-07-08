@@ -13,7 +13,7 @@ var sumAndMultiply = function(s, queries) {
 
     
 
-    const digits = [];
+    const digits = []; 
 
     for (let i = 0; i < n; i++) {
         cnt[i + 1] = cnt[i];
