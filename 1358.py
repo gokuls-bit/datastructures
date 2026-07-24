@@ -5,7 +5,7 @@ class Solution(object):
         left = 0
         ans = 0 
         n = len(s)
-
+ 
         for right in range(n):   
             count[s[right]] += 1
 
