@@ -8,7 +8,7 @@ public:
 
         for (int i = 0; i < n; i++) {
 
-            answer += (i / 8) + 1;
+            answer += (i / 8) +  1;
         }
 
         return answer;
