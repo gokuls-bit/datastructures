@@ -170,3 +170,286 @@ public:
         return answer;
     }
 };
+class Solution {
+public:
+
+    struct Node {
+        int leftChar;
+        int rightChar;
+        int prefix;
+        int suffix;
+        int best;
+
+        Node() {
+            leftChar = -1;
+            rightChar = -1;
+            prefix = 0;
+            suffix = 0;
+            best = 0;
+        }
+    };
+
+    vector<Node> tree;
+    string s;
+
+    Node merge(Node a, Node b) {
+
+        if (a.best == 0)
+            return b;
+
+        if (b.best == 0)
+            return a;
+
+        Node result;
+
+        result.leftChar = a.leftChar;
+        result.rightChar = b.rightChar;
+
+        result.prefix = a.prefix;
+        result.suffix = b.suffix;
+
+        result.best = max(a.best, b.best);
+
+        if (a.rightChar == b.leftChar) {
+
+            result.best = max(
+                result.best,
+                a.suffix + b.prefix
+            );
+
+            if (a.prefix == a.best) {
+                result.prefix = a.prefix + b.prefix;
+            }
+
+            if (b.suffix == b.best) {
+                result.suffix = b.suffix + a.suffix;
+            }
+        }
+
+        return result;
+    }
+
+    void build(int node, int l, int r) {
+
+        if (l == r) {
+
+            tree[node].leftChar = s[l];
+            tree[node].rightChar = s[l];
+
+            tree[node].prefix = 1;
+            tree[node].suffix = 1;
+            tree[node].best = 1;
+
+            return;
+        }
+
+        int mid = l + (r - l) / 2;
+
+        build(node * 2, l, mid);
+
+        build(node * 2 + 1, mid + 1, r);
+
+        tree[node] =
+            merge(tree[node * 2],
+                  tree[node * 2 + 1]);
+    }
+
+    void update(
+        int node,
+        int l,
+        int r,
+        int index,
+        char value
+    ) {
+
+        if (l == r) {
+
+            s[index] = value;
+
+            tree[node].leftChar = value;
+            tree[node].rightChar = value;
+
+            tree[node].prefix = 1;
+            tree[node].suffix = 1;
+            tree[node].best = 1;
+
+            return;
+        }
+
+        int mid = l + (r - l) / 2;
+
+        if (index <= mid) {
+
+            update(
+                node * 2,
+                l,
+                mid,
+                index,
+                value
+            );
+
+        } else {
+
+            update(
+                node * 2 + 1,
+                mid + 1,
+                r,
+                index,
+                value
+            );
+        }
+
+        tree[node] =
+            merge(tree[node * 2],
+                  tree[node * 2 + 1]);
+    }
+
+    vector<int> longestRepeating(
+        string s,
+        string queryCharacters,
+        vector<int>& queryIndices
+    ) {
+
+        this->s = s;
+
+        int n = s.size();
+
+        tree.assign(4 * n + 5, Node());
+
+        build(1, 0, n - 1);
+
+        vector<int> answer;
+
+        for (int i = 0;
+             i < queryIndices.size();
+             i++) {
+
+            int index = queryIndices[i];
+
+            char character = queryCharacters[i];
+
+            update(
+                1,
+                0,
+                n - 1,
+                index,
+                character
+            );
+
+            answer.push_back(tree[1].best);
+        }
+
+        return answer;
+    }
+};class Solution {
+public:
+    struct Node {
+        int leftChar;
+        int rightChar;
+        int prefix;
+        int suffix;
+        int best;
+        int size; // Added to track segment length
+
+        Node() {
+            leftChar = -1;
+            rightChar = -1;
+            prefix = 0;
+            suffix = 0;
+            best = 0;
+            size = 0; 
+        }
+    };
+
+    vector<Node> tree;
+    string s;
+
+    Node merge(Node a, Node b) {
+        if (a.best == 0) return b;
+        if (b.best == 0) return a;
+
+        Node result;
+        result.leftChar = a.leftChar;
+        result.rightChar = b.rightChar;
+        result.prefix = a.prefix;
+        result.suffix = b.suffix;
+        result.best = max(a.best, b.best);
+        result.size = a.size + b.size; // Maintain size
+
+        if (a.rightChar == b.leftChar) {
+            result.best = max(result.best, a.suffix + b.prefix);
+
+            // Corrected: Only extend if the entire left node is the same character
+            if (a.prefix == a.size) {
+                result.prefix = a.size + b.prefix;
+            }
+
+            // Corrected: Only extend if the entire right node is the same character
+            if (b.suffix == b.size) {
+                result.suffix = b.size + a.suffix;
+            }
+        }
+
+        return result;
+    }
+
+    void build(int node, int l, int r) {
+        if (l == r) {
+            tree[node].leftChar = s[l];
+            tree[node].rightChar = s[l];
+            tree[node].prefix = 1;
+            tree[node].suffix = 1;
+            tree[node].best = 1;
+            tree[node].size = 1; // Leaf size is 1
+            return;
+        }
+
+        int mid = l + (r - l) / 2;
+        build(node * 2, l, mid);
+        build(node * 2 + 1, mid + 1, r);
+
+        tree[node] = merge(tree[node * 2], tree[node * 2 + 1]);
+    }
+
+    void update(int node, int l, int r, int index, char value) {
+        if (l == r) {
+            s[index] = value;
+            tree[node].leftChar = value;
+            tree[node].rightChar = value;
+            tree[node].prefix = 1;
+            tree[node].suffix = 1;
+            tree[node].best = 1;
+            tree[node].size = 1; // Leaf size is 1
+            return;
+        }
+
+        int mid = l + (r - l) / 2;
+
+        if (index <= mid) {
+            update(node * 2, l, mid, index, value);
+        } else {
+            update(node * 2 + 1, mid + 1, r, index, value);
+        }
+
+        tree[node] = merge(tree[node * 2], tree[node * 2 + 1]);
+    }
+
+    vector<int> longestRepeating(string s, string queryCharacters, vector<int>& queryIndices) {
+        this->s = s;
+        int n = s.size();
+        
+        tree.assign(4 * n + 5, Node());
+        build(1, 0, n - 1);
+
+        vector<int> answer;
+        for (int i = 0; i < queryIndices.size(); i++) {
+            int index = queryIndices[i];
+            char character = queryCharacters[i];
+            
+            update(1, 0, n - 1, index, character);
+            answer.push_back(tree[1].best);
+        }
+
+        return answer;
+    }
+};
